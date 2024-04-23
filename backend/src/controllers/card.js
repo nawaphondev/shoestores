@@ -1,21 +1,20 @@
-// .js
-const prisma = require("../models/db");
+const db = require("../controllers/db");
 
 // Create a new ship address
 const createCard = async (data) => {
-  return prisma.card.create({
+  return db.card.create({
     data,
   });
 };
 
 // Get all ship addresss
 const getAllCards = async () => {
-  return prisma.card.findMany();
+  return db.card.findMany();
 };
 
 // get all Cards by user id
 const getAllCardsByUserId = async ({ userId }) => {
-  return prisma.card.findMany({
+  return db.card.findMany({
     where: {
       userId,
     },
@@ -24,7 +23,7 @@ const getAllCardsByUserId = async ({ userId }) => {
 
 // Get a ship address by ID
 const getCardById = async (id) => {
-  return prisma.card.findUnique({
+  return db.card.findUnique({
     where: {
       id,
     },
@@ -33,7 +32,7 @@ const getCardById = async (id) => {
 
 // Delete a ship address by ID
 const deleteCardById = async ({ id }) => {
-  return await prisma.card.delete({
+  return await db.card.delete({
     where: {
       id,
     },

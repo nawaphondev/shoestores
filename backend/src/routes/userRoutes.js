@@ -89,6 +89,7 @@ const path = require("path");
 // Set up multer for handling file uploadsconst path = require("path");
 
 function createFilename(req, file) {
+  console.log(req.body)
   fileExtension = path.extname(file.originalname)
   return `${req.body.username}${fileExtension}`
 }
@@ -103,9 +104,19 @@ const storage = multer.diskStorage({
 })
 const upload = multer({ storage }).single('avatar')
 
+router.put("/changeAvatar", authenticate, upload, async (req, res) => {
+  try {
+    const updatedUser = await userService.updateUserById({id: parseInt(req.body.id), avatar: req.file.filename })
+    res.json(updatedUser)
+  } catch (error) {
+    console.log(error.message)
+    res.status(500).json({ error: "Error updating user", message: error.message });
+  }
+})
+
 // Update a user by ID
 router.put("/update", authenticate, async (req, res) => {
-  console.log(req.body)
+  // console.log(req.body)
   // if (req.file != undefined) {
   //   req.body.avatar = createFilename(req, req.file)
   // }

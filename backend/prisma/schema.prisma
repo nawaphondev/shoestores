@@ -10,19 +10,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Enum for user types
-enum UserType {
-  CUSTOMER
-  ADMIN
-}
-
-// Enum for payment statuses
-enum PaymentStatus {
-  PENDING
-  COMPLETED
-  FAILED
-}
-
 // Enum for order statuses
 enum OrderStatus {
   PENDING
@@ -33,35 +20,33 @@ enum OrderStatus {
 
 // Model for users (customers and admins)
 model User {
-  id                Int               @id @default(autoincrement())
-  username          String            @unique
-  firstName         String
-  lastName          String
-  password          String
-  email             String            @unique
-  phoneNumber       String
-  avatar            String?
-  userType          UserType
-  secretQuestion String
-  secretAnswer String
-  orders            Order[]
-  shippingAddresses ShippingAddress[]
-  Cards             Card[]
-  shoppingCart      ShoppingCart?
+  id           Int           @id @default(autoincrement())
+  username     String        @unique
+  firstName    String
+  lastName     String
+  password     String
+  email        String        @unique
+  phoneNumber  String
+  avatar       String?
+  orders       Order[]
+  shoppingCart ShoppingCart?
 }
 
 // Model for products
 model Product {
   id               Int                @id @default(autoincrement())
   name             String
-  productImg       String
+  productImages    ProductImage[]
   description      String?
-  color            String
-  capacity         String
   price            Float
-  stock            Int
   orderDetails     OrderDetail[]
   shoppingCartItem ShoppingCartItem[]
+}
+
+model ProductImage {
+  file      String  @unique
+  productId Int
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }
 
 // Model for shopping carts
@@ -75,71 +60,46 @@ model ShoppingCart {
 // Model for shopping carts
 model ShoppingCartItem {
   productId      Int
+  size           String
   quantity       Int
   shoppingCartId Int
   shoppingCart   ShoppingCart @relation(fields: [shoppingCartId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   product        Product      @relation(fields: [productId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
-  @@id([productId, shoppingCartId])
+  @@id([productId, shoppingCartId, size])
 }
 
 // Model for orders
 model Order {
-  id                Int             @id @default(autoincrement())
-  orderDate         DateTime        @default(now())
-  status            OrderStatus?    @default(value: PENDING)
-  orderDetails      OrderDetail[]
-  deliveryFee       Float           @default(0)
-  userId            Int
-  shippingAddressId Int?
-  user              User            @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  shippingAddress   ShippingAddress? @relation(fields: [shippingAddressId], references: [id], onDelete: SetNull)
-  payment           Payment?
+  id           Int           @id @default(autoincrement())
+  orderDate    DateTime      @default(now())
+  status       OrderStatus   @default(value: PENDING)
+  orderDetails OrderDetail[]
+  deliveryFee  Float         @default(0)
+  userId       Int
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  firstName    String
+  lastName     String
+  email        String
+  phoneNumber  String
+  address      String
+  postalCode   String
+  province     String
+  district     String
+  subdistrict  String
+  cardName     String
+  cardNumber   String
 }
 
 // Model for order details
 model OrderDetail {
-  id        Int     @id @default(autoincrement())
   orderId   Int
   productId Int
+  size      String
   quantity  Int
   price     Float
   order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   product   Product @relation(fields: [productId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-}
 
-// Model for payments
-model Payment {
-  id          Int           @id @default(autoincrement())
-  paymentDate DateTime      @default(now())
-  amount      Float
-  method      String
-  status      PaymentStatus @default(value: PENDING)
-  orderId     Int           @unique
-  order       Order         @relation(fields: [orderId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-}
-
-// Model for payment methods
-model Card {
-  id     Int    @id @default(autoincrement())
-  userId Int
-  number String
-  cvv    String
-  month  String
-  year   String
-  name   String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-}
-
-// Model for shipping addresses
-model ShippingAddress {
-  id          Int     @id @default(autoincrement())
-  userId      Int
-  address     String
-  subdistrict String
-  district    String
-  province    String
-  postalCode  String
-  order       Order[]
-  user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@id([orderId, productId, size])
 }

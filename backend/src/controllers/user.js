@@ -1,16 +1,15 @@
-// .js
-const prisma = require("../models/db");
+const db = require("../controllers/db");
 
 // Create a new user
 const createUser = async (data) => {
-  return prisma.user.create({
+  return db.user.create({
     data,
   });
 };
 
 // Get all users
 const getAllUsers = async () => {
-  return prisma.user.findMany({
+  return db.user.findMany({
     where: {
       userType: "CUSTOMER",
     },
@@ -19,7 +18,7 @@ const getAllUsers = async () => {
 
 // Get all admins
 const getAllAdmins = async () => {
-  return prisma.user.findMany({
+  return db.user.findMany({
     where: {
       userType: "ADMIN",
     },
@@ -28,7 +27,7 @@ const getAllAdmins = async () => {
 
 // Get a user by ID
 const getUserById = async (id) => {
-  return prisma.user.findUnique({
+  return db.user.findUnique({
     where: {
       id,
     },
@@ -44,7 +43,7 @@ const getUserById = async (id) => {
 
 // Get a user by username
 const getUserByUsername = async (username) => {
-  return await prisma.user.findUnique({
+  return await db.user.findUnique({
     where: {
       username,
     },
@@ -54,7 +53,7 @@ const getUserByUsername = async (username) => {
 // Update a user by ID
 const updateUserById = async (data) => {
   // console.log(data)
-  return await prisma.user.update({
+  return await db.user.update({
     where: {
       id: data.id
     },
@@ -64,7 +63,7 @@ const updateUserById = async (data) => {
 
 // Delete a user by ID
 const deleteUserById = async (id) => {
-  return prisma.user.delete({
+  return db.user.delete({
     where: {
       id,
     },

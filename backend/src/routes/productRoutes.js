@@ -29,10 +29,10 @@ router.post("/add", upload, async (req, res) => {
   if (req.file != undefined) {
     data.productImg = createFilename(req, req.file)
   }
-  
+
   try {
     const newProduct = await productService.createProduct(data);
-    
+
     res.status(201).json(newProduct);
   } catch (error) {
     console.log(error.message)

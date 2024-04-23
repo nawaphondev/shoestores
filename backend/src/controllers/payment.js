@@ -1,22 +1,21 @@
-// .js
-const prisma = require("../models/db");
+const db = require("../controllers/db");
 
 // Create a new ship address
 const createPayment = async (data) => {
-  return prisma.payment.create({
+  return db.payment.create({
     data,
   });
 };
 
 // Get all ship addresss
 const getAllPayments = async () => {
-  return prisma.payment.findMany();
+  return db.payment.findMany();
 };
 
 // get all Paymentss by user id
 const getAllPaymentsByUserId = async ({ userId }) => {
   console.log(userId)
-  return prisma.payment.findMany({
+  return db.payment.findMany({
     where: {
       userId,
     },
@@ -25,7 +24,7 @@ const getAllPaymentsByUserId = async ({ userId }) => {
 
 // Get a ship address by ID
 const getPaymentById = async (id) => {
-  return prisma.payment.findUnique({
+  return db.payment.findUnique({
     where: {
       id,
     },
@@ -34,7 +33,7 @@ const getPaymentById = async (id) => {
 
 // Update a ship address by ID
 const updatePaymentById = async (id, data) => {
-  return prisma.payment.update({
+  return db.payment.update({
     where: {
       id,
     },
@@ -44,7 +43,7 @@ const updatePaymentById = async (id, data) => {
 
 // Delete a ship address by ID
 const deletePaymentById = async ({ id }) => {
-  return await prisma.payment.delete({
+  return await db.payment.delete({
     where: {
       id,
     },

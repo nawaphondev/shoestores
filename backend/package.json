@@ -9,6 +9,7 @@
     "start": "node app.js",
     "generate": "prisma generate",
     "studio": "prisma studio",
+    "push": "prisma db push",
     "migrate:dev": "prisma migrate dev",
     "migrate:deploy": "prisma migrate deploy",
     "migrate:status": "prisma migrate status",

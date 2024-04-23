@@ -45,11 +45,11 @@ router.get("/get/:id", async (req, res) => {
 
 // add item to a cart
 router.post("/add", async (req, res) => {
-  // console.log(req.body);
   try {
     const cartItem = await cartService.addCartItemByCartId(req.body);
     res.json(cartItem);
   } catch (error) {
+    console.log(error.message)
     res
       .status(500)
       .json({ error: "Error adding item to cart", message: error.message });

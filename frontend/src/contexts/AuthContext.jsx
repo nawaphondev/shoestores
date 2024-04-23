@@ -1,6 +1,7 @@
 /* eslint-disable react/prop-types */
 import axios from "axios";
-import { createContext, useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { createContext, useState } from "react";
 
 const AuthContext = createContext();
 
@@ -8,27 +9,31 @@ function AuthContextProvider(props) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const run = async () => {
-      try {
-        setLoading(true);
-        let token = localStorage.getItem("token");
-        if (!token) {
-          return;
-        }
-        const rs = await axios.get("http://localhost:3001/auth/me", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        // console.log(rs.data)
-        setUser(rs.data);
-      } catch (err) {
-        console.log(err.message);
-      } finally {
-        setLoading(false);
+  useQuery({
+    queryKey: ["user"],
+    queryFn: auth,
+  });
+
+  async function auth() {
+    try {
+      setLoading(true);
+      let token = localStorage.getItem("token");
+      if (!token) {
+        return null;
       }
-    };
-    run();
-  }, []);
+      const rs = await axios.get("http://localhost:3001/auth/me", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      // console.log(rs.data)
+      setUser(rs.data);
+      return (rs.data)
+    } catch (err) {
+      console.log(err.message);
+      return null
+    } finally {
+      setLoading(false);
+    }
+  }
 
   function logout() {
     try {

@@ -2,8 +2,7 @@ import LoginForm from "../components/forms/LoginForm";
 
 export default function LoginPage() {
   return (
-    <div className="flex flex-row items-center flex-grow w-8/12 mx-auto justify-evenly">
-      <img src="/login.png" alt="" />
+    <div className="flex items-center justify-center flex-1">
       <LoginForm />
     </div>
   );

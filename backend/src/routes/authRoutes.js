@@ -2,7 +2,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const express = require("express");
 const authenticate = require("../middlewares/authenticate");
-const prisma = require("../models/db");
+const db = require("../controllers/db");
 const { createCart } = require("../controllers/cart");
 const router = express.Router();
 
@@ -12,43 +12,43 @@ const {
   updateUserById,
 } = require("../controllers/user");
 
-router.post("/register", async (req, res, next) => {
-  const {
-    username,
-    password,
-    confirmPassword,
-    email,
-    phoneNumber,
-    firstName,
-    lastName,
-    userType,
-    secretQuestion,
-    secretAnswer
-  } = req.body;
+const multer = require("multer");
+const path = require("path");
+// Set up multer for handling file uploadsconst path = require("path");
+
+function createFilename(req, file) {
+  console.log(req.body)
+  fileExtension = path.extname(file.originalname)
+  return `${req.body.username}${fileExtension}`
+}
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, './public/avatar/')
+  },
+  filename: function (req, file, cb) {
+    cb(null, createFilename(req, file))
+  }
+})
+const upload = multer({ storage }).single('avatar')
+
+router.post("/register", upload, async (req, res, next) => {
+  const data = req.body;
 
   try {
-    if (!(username && password && confirmPassword)) {
+    if (!(data.username && data.password && data.confirmPassword)) {
       return next(new Error("Fulfill all inputs"));
     }
-    if (confirmPassword !== password) {
+    if (data.confirmPassword !== data.password) {
       throw new Error("Confirm Password is not match");
     }
 
-    const hashedPassword = await bcrypt.hash(password, 8);
+    const hashedPassword = await bcrypt.hash(data.password, 8);
 
-    const data = {
-      username,
-      firstName,
-      lastName,
-      password: hashedPassword,
-      email,
-      phoneNumber,
-      secretQuestion,
-      secretAnswer,
-      userType: userType || "CUSTOMER",
-    };
 
-    const rs = await createUser(data);
+    console.log(data)
+
+    const rs = await createUser({ ...data, password: hashedPassword, avatar: req.file.filename, confirmPassword: undefined });
     await createCart({ userId: rs.id });
 
     res.json({ msg: "Register successful" });
@@ -99,7 +99,7 @@ router.post("/changePassword", authenticate, async (req, res, next) => {
       throw new Error("confirm password not match");
     }
 
-    const user = await prisma.user.findUniqueOrThrow({
+    const user = await db.user.findUniqueOrThrow({
       where: {
         id,
       },
@@ -114,7 +114,7 @@ router.post("/changePassword", authenticate, async (req, res, next) => {
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, 8);
-    await updateUserById(id, { password: hashedPassword });
+    await updateUserById({ id, password: hashedPassword });
 
     res.json({ msg: "Password Changed" });
   } catch (err) {

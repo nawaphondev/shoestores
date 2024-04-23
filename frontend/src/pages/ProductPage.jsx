@@ -1,22 +1,10 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Link, useParams } from "react-router-dom";
-import { Button } from "../components/ui/button";
-import Icons from "../components/Icons";
-import { toast } from "sonner";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
+import { useNavigate, useParams } from "react-router-dom";
 import { useRef, useState } from "react";
-import useAuth from "@/hooks/useAuth";
-import NumberSelector from "@/components/NumberSelector";
+import useAuth from "../hooks/useAuth";
 import { useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
+import NumberSelector from "../components/NumberSelector";
 
 export default function ProductPage() {
   const { id } = useParams();
@@ -24,13 +12,16 @@ export default function ProductPage() {
   const queryClient = useQueryClient();
   const quantityRef = useRef(null);
   const [quantity, setQuantity] = useState(1);
+  const [size, setSize] = useState("");
+  const [error, setError] = useState(false);
+  const navigate = useNavigate();
 
   const {
     data: product,
     isError,
     isLoading,
   } = useQuery({
-    queryKey: ["products"],
+    queryKey: ["product", id],
     queryFn: async () => {
       return axios
         .get(`http://localhost:3001/api/products/get/${id}`)
@@ -44,6 +35,7 @@ export default function ProductPage() {
         .post(`http://localhost:3001/api/carts/add`, {
           ...data,
           shoppingCartId: user.shoppingCart.id,
+          // size,
         })
         .then((res) => res.data);
     },
@@ -53,150 +45,106 @@ export default function ProductPage() {
   if (isLoading) return <div>กำลังโหลด</div>;
 
   return (
-    <div className="flex items-center justify-center flex-grow w-8/12 mx-auto mt-3 p-3">
-      <div className="flex flex-col gap-y-6">
-        <div className="grid grid-cols-2 gap-x-16">
+    <div className="flex items-center justify-center flex-1 w-8/12 mx-auto">
+      <div className="flex gap-x-6">
+        <div className="flex flex-col items-center justify-center gap-y-4">
           <img
-            src={`http://localhost:3001/images/${product.productImg}`}
+            src={`http://localhost:3001/images/${product.productImages[0].file}`}
             alt={product.name}
-            className="py-16 px-28 border border-[#E4E7E9]"
+            className="w-7/12"
           />
-          <div className="flex flex-col w-full gap-y-6">
-            <h1 className="text-xl">
-              {product.name} {product.capacity} {product.color}
-            </h1>
-            <div className="grid grid-cols-2">
-              <div className="text-[#5F6C72]">
-                ID:{" "}
-                <span className="text-[#191C1F] font-medium">{product.id}</span>
-              </div>
-
-              <div className="text-[#5F6C72]">
-                STOCK:{" "}
-                <span className="text-[#25B800] font-medium">
-                  {product.stock}
-                </span>
-              </div>
-              <div className="text-[#5F6C72]">
-                PRODUCT:{" "}
-                <span className="text-[#191C1F] font-medium">
-                  {product.name}
-                </span>
-              </div>
-            </div>
-            <Separator />
-            <div className="flex flex-col gap-y-2">
-              <Label>สี</Label>
-              <Select>
-                <SelectTrigger>
-                  <SelectValue placeholder="เลือกสี" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Black">Black</SelectItem>
-                  <SelectItem value="White">White</SelectItem>
-                </SelectContent>
-              </Select>
-              <Label>ความจุ</Label>
-              <Select>
-                <SelectTrigger>
-                  <SelectValue placeholder="เลือกความจุ" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="64 GB">64 GB Storage</SelectItem>
-                  <SelectItem value="128 GB">128 GB Storage</SelectItem>
-                  <SelectItem value="128 GB">256 GB Storage</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="flex flex-col gap-y-2 mt-auto">
-              <div className="flex flex-row gap-2">
-                <NumberSelector
-                  className="w-1/5 text-center"
-                  ref={quantityRef}
-                  quantity={1}
-                  onChange={(e) => console.log("onChange", e)}
-                  getValue={setQuantity}
+          <div className="flex items-center h-56 gap-4 justify-evenly">
+            {product.productImages.map((image, i) => {
+              if (i == 0) return null;
+              return (
+                <img
+                  key={i}
+                  src={`http://localhost:3001/images/${image.file}`}
+                  alt={product.name}
                 />
-                <Button
-                  variant={"outline"}
-                  className="w-full border-primary text-primary"
-                  onClick={() => {
-                    mutate(
-                      {
-                        productId: product.id,
-                        quantity,
-                      },
-                      {
-                        onSuccess: () => {
-                          queryClient.invalidateQueries({
-                            queryKey: ["shoppingCartItems"],
-                          });
-                          toast(`${product.name} ถูกเพิ่มไปยังตะกร้า`, {
-                            action: {
-                              label: "เรียกกลับ",
-                              onClick: () => console.log("เรียกกลับ"),
-                            },
-                          });
-                        },
-                      }
-                    );
-                  }}
-                >
-                  เพิ่มไปยังตะกร้า
-                </Button>
-              </div>
-              <Button className="w-full" asChild>
-                <Link
-                  to={{ pathname: "/checkout" }}
-                  state={{
-                    items: [{ product, quantity }],
-                    total: product.price * quantity,
-                  }}
-                >
-                  สั่งซื้อ
-                </Link>
-              </Button>
-            </div>
+              );
+            })}
           </div>
         </div>
-        <div className="border border-[#E4E7E9] flex flex-col w-full">
-          <div className="border border-[#E4E7E9] flex justify-center">
-            <div className="border-b-[3px] border-orange-400">
-              คำอธิบายสินค้า
-            </div>
-          </div>
-          <div className="border border-[#E4E7E9] px-44 flex justify-center gap-x-32 py-6 items-start">
-            <div className="grid grid-rows-7 text-[#5F6C72] gap-x-2 w-full h-full gap-y-1 text-nowrap">
-              <h3 className="font-medium text-[#191C1F] col-span-2">
-                Description
-              </h3>
-              <div>Screen size:</div>
-              <div>6.1 Inch</div>
-              <div>Chip:</div>
-              <div>A13 Bionic</div>
-              <div>Display:</div>
-              <div>Liquid Retina</div>
-              <div>Front Camera:</div>
-              <div>12MP</div>
-              <div>Back Camera:</div>
-              <div>Dual 12MP (Wide and Ultra Wide)</div>
-              <div>Connection Ports:</div>
-              <div>Lightning</div>
-            </div>
 
-            <div className="grid grid-rows-6 gap-x-2 text-[#191C1F] w-full gap-y-2 items-center text-nowrap">
-              <h3 className="col-span-2 font-medium">Feature</h3>
-              <Icons.shield className="text-primary w-min" />
-              <div>1 Year Warranty</div>
-              <Icons.truck className="text-primary" />
-              <div>Free Shipping and Fast Delivery</div>
-              <Icons.handshake className="text-primary" />
-              <div>100% Money Back Garauntee</div>
-              <Icons.headset className="text-primary" />
-              <div>24/7 Customer Support</div>
-              <Icons.creditcard className="text-primary" />
-              <div>Secure Payment Method</div>
+        <div className="flex flex-col w-full gap-y-6">
+          <h1 className="text-xl">{product.name}</h1>
+          <h1 className="text-xl">฿{product.price}</h1>
+
+          <div className="flex items-center justify-between gap-x-4">
+            <div className="flex flex-col items-center justify-center gap-y-2">
+              <label className="w-full max-w-xs form-control">
+                <select
+                  className="w-full select select-bordered"
+                  defaultValue={"Select a size"}
+                  onChange={(e) => {
+                    setSize(e.target.value);
+                    setError(false);
+                  }}
+                >
+                  <option disabled>เลือกไซส์</option>
+                  <option>42</option>
+                  <option>43</option>
+                  <option>44</option>
+                  <option>45</option>
+                  <option>46</option>
+                </select>
+                <div className="label">
+                  {error && (
+                    <span className="text-red-600 label-text">
+                      กรุณาเลือกไซส์
+                    </span>
+                  )}
+                </div>
+              </label>
+
+              <NumberSelector
+                className="text-center"
+                ref={quantityRef}
+                quantity={1}
+                onChange={(quantity) => setQuantity(quantity)}
+              />
+            </div>
+            <div className="flex flex-col items-center justify-center gap-y-6">
+              <button
+                className="btn btn-wide btn-primary"
+                onClick={() => {
+                  if (size === "") {
+                    return setError(true);
+                  }
+                  mutate(
+                    {
+                      productId: product.id,
+                      quantity,
+                      size,
+                    },
+                    {
+                      onSuccess: () => {
+                        queryClient.invalidateQueries({
+                          queryKey: ["shoppingCartItems"],
+                        });
+                      },
+                    }
+                  );
+                }}
+              >
+                เพิ่มไปยังตะกร้า
+              </button>
+
+              <button
+                onClick={() => {
+                  if (size === "") {
+                    return setError(true);
+                  }
+                  navigate(
+                    { pathname: "/checkout" },
+                    { state: { items: [{ product, quantity, size }] } }
+                  );
+                }}
+                className="btn btn-outline btn-wide btn-primary"
+              >
+                สั่งซื้อ
+              </button>
             </div>
           </div>
         </div>

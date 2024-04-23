@@ -1,17 +1,6 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
-import { Progress } from "@/components/ui/progress";
-import Icons from "@/components/Icons";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { thaiDateFormat } from "@/lib/utils";
+import { thaiDateFormat } from "../../lib/utils";
 import axios from "axios";
 
 export default function OrderDetails() {
@@ -33,19 +22,18 @@ export default function OrderDetails() {
   if (isLoading) return <div>กำลังโหลด...</div>;
 
   return (
-    <div className="flex items-center justify-center flex-grow w-8/12 mx-auto">
-      <Card className="w-full rounded-sm">
-        <CardHeader>
-          <CardTitle>รายละเอียดการสั่งซื้อ</CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-col p-6 border-y">
-          <div className="flex flex-row justify-between p-6 border bg-accent">
+    <div className="flex items-center justify-center flex-1 w-8/12 mx-auto">
+      <div className="card">
+        <div className="card-body">
+          <div className="card-title">รายละเอียดการสั่งซื้อ</div>
+
+          <div className="flex flex-row justify-between">
             <div className="flex flex-col">
               <div>#{order.id}</div>
               <div>{thaiDateFormat(order.orderDate)}</div>
             </div>
             <h1>
-              {order.orderDetails &&
+              ฿{order.orderDetails &&
                 order.orderDetails?.reduce(
                   (acc, cur) => acc + cur.price * cur.quantity,
                   0
@@ -55,51 +43,127 @@ export default function OrderDetails() {
           <div>
             คำสั่งซื้อคาดว่าจะถึงวันที่ {thaiDateFormat(order.orderDate)}
           </div>
-          <div className="py-4 space-y-6 px-44">
-            <Progress value={25} />
-            <div className="flex flex-row items-center justify-between">
-              <Icons.book className="w-12 h-12" />
-              <Icons.package className="w-12 h-12" />
-              <Icons.truck className="w-12 h-12" />
-              <Icons.handshake className="w-12 h-12" />
-            </div>
-          </div>
+          <ul className="timeline">
+            <li>
+              <div className="timeline-middle">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                  className="w-5 h-5 text-accent"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </div>
+              <div className="timeline-end timeline-box">ได้รับการสั่งซื้อ</div>
+              <hr className="bg-accent"/>
+            </li>
+            <li>
+              <hr className="bg-accent"/>
+              <div className="timeline-middle">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                  className="w-5 h-5 text-accent"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </div>
+              <div className="timeline-end timeline-box">เตรียมจัดส่ง</div>
+              <hr className="bg-accent"/>
+            </li>
+            <li>
+              <hr />
+              <div className="timeline-middle">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                  className="w-5 h-5"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </div>
+              <div className="timeline-end timeline-box">กำลังจัดส่ง</div>
+              <hr />
+            </li>
+            <li>
+              <hr />
+              <div className="timeline-middle">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                  className="w-5 h-5"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </div>
+              <div className="timeline-end timeline-box">ได้รับสินค้าแล้ว</div>
+            </li>
+          </ul>
           <div>
             สินค้า{" "}
             {order.orderDetails &&
               order.orderDetails.reduce((acc, item) => acc + item.quantity, 0)}
           </div>
-          <Table>
-            <TableHeader className="bg-accent">
-              <TableRow>
-                <TableHead>สินค้า</TableHead>
-                <TableHead>ราคา</TableHead>
-                <TableHead className="w-[100px]">จำนวน</TableHead>
-                <TableHead className="text-right">ยอดรวมสุทธิ</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {order.orderDetails?.map((item) => (
-                <TableRow key={item.id}>
-                  <TableCell className="flex flex-row items-center font-medium gap-x-6">
-                    <img
-                      src={`http://localhost:3001/images/${item.product.productImg}`}
-                      className="w-[100px]"
-                    />
-                    {item.product.name} {item.product.capacity}{" "}
-                    {item.product.color}
-                  </TableCell>
-                  <TableCell>{item.price}</TableCell>
-                  <TableCell>{item.quantity}</TableCell>
-                  <TableCell className="text-right">
-                    {item.quantity * item.price}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+
+          <div className="overflow-x-auto">
+            <table className="table">
+              {/* head */}
+              <thead>
+                <tr>
+                  <th>ชื่อสินค้า</th>
+                  <th>ราคา</th>
+                  <th>จำนวน</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {order.orderDetails?.map((item, i) => (
+                  <tr key={i}>
+                    <td>
+                      <div className="flex items-center gap-3">
+                        <div className="avatar">
+                          <div className="w-12 h-12 mask mask-squircle">
+                            <img
+                              src={`http://localhost:3001/images/${item.product.productImages[0].file}`}
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <div className="font-bold">{item.product.name}</div>
+                          <div className="text-sm opacity-50">{item.size}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td>฿{item.price}</td>
+                    <td>x {item.quantity}</td>
+                    <td>฿{item.quantity * item.price}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

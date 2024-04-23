@@ -1,25 +1,34 @@
 import axios from "axios";
-import { useState } from "react";
 import useAuth from "../../hooks/useAuth";
 import { Link } from "react-router-dom";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+
+const loginFormSchema = z.object({
+  username: z.string().min(1, { message: "กรุณาระบุชื่อผู้ใช้ (Username)" }),
+  password: z.string().min(1, { message: "กรุณาระบุรหัสผ่าน" }),
+});
 
 export default function LoginForm() {
   const { setUser } = useAuth();
-  const [input, setInput] = useState({
-    username: "",
-    password: "",
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(loginFormSchema),
+    defaultValues: {
+      username: "",
+      password: "",
+    },
   });
 
-  const hdlChange = (e) => {
-    setInput((prv) => ({ ...prv, [e.target.name]: e.target.value }));
-  };
-
-  const hdlSubmit = async (e) => {
+  async function loginFormOnSubmit(values) {
     // console.log(input)
     try {
-      e.preventDefault();
       // validation
-      const rs = await axios.post("http://localhost:3001/auth/login", input);
+      const rs = await axios.post("http://localhost:3001/auth/login", values);
       // console.log(rs.data.token)
       localStorage.setItem("token", rs.data.token);
       const rs1 = await axios.get("http://localhost:3001/auth/me", {
@@ -31,61 +40,69 @@ export default function LoginForm() {
     } catch (err) {
       console.log(err.message);
     }
-  };
+  }
 
   return (
-    <div className="flex flex-col w-2/5 p-8 border border-[#E4E7E9] rounded-2xl gap-4">
-      <div className="flex items-center justify-center">
-        <img src="/logo.png" alt="" />
-        <h1 className="text-4xl font-medium text-[#8B8E99]">devphone</h1>
-      </div>
-      <div className="mb-5 text-3xl">เข้าสู่ระบบ</div>
-      <form
-        className="flex flex-col items-center justify-center gap-3"
-        onSubmit={hdlSubmit}
-      >
+    <form
+      className="p-2 shadow-xl card w-[500px]"
+      onSubmit={handleSubmit(loginFormOnSubmit)}
+    >
+      <div className="w-full card-body gap-y-4">
+        <h1 className="card-title">เข้าสู่ระบบ</h1>
+
         <label className="w-full form-control">
-          <span className="text-[#8B8E99] text-sm">ชื่อผู้ใช้</span>
+          <div className="label">
+            <span className="label-text">ชื่อผู้ใช้ (Username)</span>
+          </div>
           <input
             type="text"
-            className="w-full p-2 rounded-md bg-background border border-[#E4E7E9]"
-            placeholder="ชื่อผู้ใช้"
             name="username"
-            value={input.username}
-            onChange={hdlChange}
+            {...register("username")}
+            className="w-full input input-bordered"
           />
+          <div className="label">
+            {errors.username && (
+              <span className="text-red-600 label-text-alt">
+                {errors.username.message}
+              </span>
+            )}
+          </div>
         </label>
 
         <label className="w-full form-control">
-          <span className="text-[#8B8E99] text-sm">รหัสผ่าน</span>
+          <div className="label">
+            <span className="label-text">รหัสผ่าน</span>
+          </div>
           <input
             type="password"
-            className="w-full p-2 rounded-md bg-background border border-[#E4E7E9]"
-            placeholder="รหัสผ่าน"
-            autoComplete="off"
             name="password"
-            value={input.password}
-            onChange={hdlChange}
+            {...register("password")}
+            className="w-full input input-bordered"
           />
+          <div className="label">
+            {errors.password && (
+              <span className="text-red-600 label-text-alt">
+                {errors.password.message}
+              </span>
+            )}
+          </div>
         </label>
 
-        <Link className="font-bold text-primary" to="/forgot">ลืมรหัสผ่าน?</Link>
-        <div className="flex w-full gap-5">
-          <button
-            type="submit"
-            className="w-full p-3 text-center rounded-lg bg-primary text-primary-foreground"
-          >
-            เข้าสู่ระบบ
-          </button>
-        </div>
-      </form>
+        <div className="items-center justify-center w-full card-actions">
+          <div className="flex flex-col gap-y-6">
+            <div>
+              ยังไม่มีบัญชี?{" "}
+              <Link className="font-bold text-primary" to="/register">
+                ลงทะเบียนได้ที่นี่
+              </Link>
+            </div>
 
-      <div className="flex flex-row justify-center w-full gap-16">
-        <div>ยังไม่มีบัญชี?</div>
-        <Link className="font-bold text-primary" to="/register">
-          ลงทะเบียนได้ที่นี่
-        </Link>
+            <button type="submit" className="rounded-3xl btn btn-primary">
+              เข้าสู่ระบบ
+            </button>
+          </div>
+        </div>
       </div>
-    </div>
+    </form>
   );
 }

@@ -1,29 +1,30 @@
 /* eslint-disable react/prop-types */
 import { useState, forwardRef, useEffect } from "react";
-import Icons from "./Icons";
-import { cn } from "@/lib/utils";
 
 const NumberSelector = forwardRef(function NumberSelector(
-  { quantity, className, getValue },
+  { quantity, onChange },
   ref
 ) {
   const [value, setValue] = useState(quantity);
 
   useEffect(() => {
-    getValue(value);
+    onChange(value);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value]);
 
   return (
-    <div className="flex flex-row items-center justify-center p-2 border rounded-md select-none">
-      <Icons.minus
+    <div className="flex items-center justify-center p-2 border rounded-md w-fit gap-x-4">
+      <span
         onClick={() =>
           setValue((prev) => {
             if (prev <= 1) return prev;
             else return prev - 1;
           })
         }
-        className="w-8 h-8"
-      />
+        className="px-2 cursor-pointer"
+      >
+        -
+      </span>
       <input
         type="number"
         ref={ref}
@@ -32,12 +33,14 @@ const NumberSelector = forwardRef(function NumberSelector(
           if (e.target.value <= 1) return;
           setValue(e.target.value);
         }}
-        className={cn(className, "text-center select-none")}
+        className="text-center select-none"
       />
-      <Icons.plus
+      <span
         onClick={() => setValue((prev) => prev + 1)}
-        className="w-8 h-8"
-      />
+        className="px-2 cursor-pointer"
+      >
+        +
+      </span>
     </div>
   );
 });

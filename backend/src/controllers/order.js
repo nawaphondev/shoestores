@@ -1,22 +1,21 @@
-// .js
-const prisma = require("../models/db");
+const db = require("../controllers/db");
 
 // Create a new order
 const createOrder = async (data) => {
-  return await prisma.order.create({
+  return await db.order.create({
     data,
   });
 };
 
 const createOrderDetail = async (data) => {
-  return await prisma.orderDetail.create({
+  return await db.orderDetail.create({
     data,
   });
 };
 
 //create many order detail
 const createManyOrderDetail = async (data) => {
-  return await prisma.orderDetail.createMany({
+  return await db.orderDetail.createMany({
     data,
     skipDuplicates: true,
   });
@@ -24,7 +23,7 @@ const createManyOrderDetail = async (data) => {
 
 // Get all orders
 const getAllOrders = async () => {
-  return prisma.order.findMany({
+  return db.order.findMany({
     include: {
       orderDetails: {
         include: {
@@ -49,22 +48,28 @@ const getAllOrders = async () => {
 
 // Get a order by ID
 const getOrderById = async (id) => {
-  return prisma.order.findUnique({
+  return db.order.findUnique({
     where: {
       id,
     },
     include: {
       orderDetails: {
-        include: {
+        select: {
+          price: true,
+          quantity: true,
+          size: true,
           product: {
             select: {
               name: true,
-              productImg: true,
-              capacity: true,
-              color: true,
-            },
-          },
-        },
+              productImages: {
+                take: 1,
+                select: {
+                  file: true,
+                }
+              }
+            }
+          }
+        }
       },
     },
   });
@@ -72,7 +77,7 @@ const getOrderById = async (id) => {
 
 // Update a order by ID
 const updateOrderById = async (id, data) => {
-  return prisma.order.update({
+  return db.order.update({
     where: {
       id,
     },
@@ -82,7 +87,7 @@ const updateOrderById = async (id, data) => {
 
 // Delete a order by ID
 const deleteOrderById = async (id) => {
-  return prisma.order.delete({
+  return db.order.delete({
     where: {
       id,
     },
@@ -91,7 +96,7 @@ const deleteOrderById = async (id) => {
 
 // get all orders from user
 const getOrdersByUserId = async (userId) => {
-  return prisma.order.findMany({
+  return db.order.findMany({
     where: {
       userId,
     },

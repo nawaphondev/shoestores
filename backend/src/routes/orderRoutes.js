@@ -11,34 +11,40 @@ router.post("/new", async (req, res) => {
   // console.log(req.body);
   try {
     const newOrder = await orderService.createOrder({
-      shippingAddressId: parseInt(data.shippingAddressId),
       userId: data.userId,
+      firstName: data.firstName,
+      lastName: data.lastName,
+      email: data.email,
+      phoneNumber: data.phoneNumber,
+      address: data.address,
+      postalCode: data.postalCode,
+      province: data.province,
+      district: data.district,
+      subdistrict: data.subdistrict,
+      cardName: data.cardName,
+      cardNumber: data.cardNumber,
     });
     const { id: orderId } = newOrder;
+
 
     const orderDetails = data.items.map((item) => {
       return {
         productId: item.product.id,
         quantity: item.quantity,
         price: item.product.price,
+        size: item.size,
         orderId,
       };
     });
-    await orderService.createManyOrderDetail(orderDetails);
-    await removeShoppingCartItems(
-      data.shoppingCartId,
-      orderDetails.map((item) => item.productId)
-    );
-    const payment = await paymentService.createPayment({
-      orderId,
-      method: data.paymentMethod,
-      amount: orderDetails.reduce(
-        (acc, item) => acc + item.price * item.quantity,
-        0
-      ),
-    });
 
-    res.json({ ...newOrder, paymentId: payment.id });
+    await orderService.createManyOrderDetail(orderDetails);
+    removeShoppingCartItems(
+      data.shoppingCartId,
+      orderDetails.map((item) => item.productId),
+      orderDetails.map((item) => item.size)
+    );
+
+    res.json({ ...newOrder });
   } catch (error) {
     console.log(req.body, error.message);
     res
@@ -61,7 +67,7 @@ router.get("/all", async (req, res) => {
 
 // Get a order by ID
 router.get("/:id", async (req, res) => {
-  const orderId = parseInt(req.params.id, 10);
+  const orderId = parseInt(req.params.id);
 
   try {
     const order = await orderService.getOrderById(orderId);
@@ -73,6 +79,7 @@ router.get("/:id", async (req, res) => {
 
     res.json(order);
   } catch (error) {
+    console.log(error.message)
     res
       .status(500)
       .json({ error: "Error getting order", message: error.message });

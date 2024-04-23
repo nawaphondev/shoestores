@@ -1,9 +1,8 @@
-// .js
-const prisma = require("../models/db");
+const db = require("../controllers/db");
 
 // Create a new ship address
 const createOrEditShipAddress = async (data) => {
-  return prisma.shippingAddress.upsert({
+  return db.shippingAddress.upsert({
     where: {
       id: data.id || 0,
     },
@@ -14,12 +13,12 @@ const createOrEditShipAddress = async (data) => {
 
 // Get all ship addresss
 const getAllShipAddresss = async () => {
-  return prisma.shippingAddress.findMany();
+  return db.shippingAddress.findMany();
 };
 
 // get all shipAddresss by user id
 const getAllShipAddresssByUserId = async ({ userId }) => {
-  return prisma.shippingAddress.findMany({
+  return db.shippingAddress.findMany({
     where: {
       userId,
     },
@@ -28,7 +27,7 @@ const getAllShipAddresssByUserId = async ({ userId }) => {
 
 // Get a ship address by ID
 const getShipAddressById = async (id) => {
-  return prisma.shippingAddress.findUnique({
+  return db.shippingAddress.findUnique({
     where: {
       id,
     },
@@ -37,7 +36,7 @@ const getShipAddressById = async (id) => {
 
 // Update a ship address by ID
 const updateShipAddressById = async (id, data) => {
-  return prisma.shippingAddress.update({
+  return db.shippingAddress.update({
     where: {
       id,
     },
@@ -47,7 +46,7 @@ const updateShipAddressById = async (id, data) => {
 
 // Delete a ship address by ID
 const deleteShipAddressById = async ({ id }) => {
-  return await prisma.shippingAddress.delete({
+  return await db.shippingAddress.delete({
     where: {
       id,
     },
